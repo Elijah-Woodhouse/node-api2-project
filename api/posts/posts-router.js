@@ -56,4 +56,42 @@ router.get("/", (req, res) => {
         }
     })
 
+    router.put("/:id", async (req, res) => {
+        const updatedPost = await Post.findById(req.params.id)
+        const { title, contents } = req.body
+        if(!updatedPost) {
+            res.status(404).json({
+                message: "does not exist"
+            })
+        } else {
+            if (!title || !contents) {
+                res.status(400).json({
+                    message: "provide title and contents"
+                })
+            } else {
+                Post.findById(req.params.id)
+                    .then(stuff => {
+                            return Post.update(req.params.id, req.body)
+                    })
+                    .then(data => {
+                        if (data){
+                            return Post.findById(req.params.id)
+                        }
+                    })
+                    .then(post => {
+                        if(post){
+                            res.json(post)
+                        }
+                    })
+                    .catch(err => {
+                        res.status(500).json({
+                            message: "Post could not be retrieved, sorry.",
+                            err: err.message,
+                            stack: err.stack
+                        })
+                    })
+            }
+        }
+    })
+
 module.exports = router;
